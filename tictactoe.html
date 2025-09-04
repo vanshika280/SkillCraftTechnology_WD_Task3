@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tic Tac Toe</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      color: #fff;
+      overflow: hidden;
+    }
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Starry effect */
+    .stars {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: transparent;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: twinkle 2s infinite alternate;
+    }
+    @keyframes twinkle {
+      from { opacity: 0.2; }
+      to { opacity: 1; }
+    }
+
+    header, footer {
+      width: 100%;
+      text-align: center;
+      padding: 15px;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(6px);
+      position: relative;
+      z-index: 2;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2em;
+      color: #00ffcc;
+      text-shadow: 0 0 10px #00ffcc;
+    }
+    footer {
+      font-size: 1em;
+      color: #ddd;
+    }
+
+    .container {
+      display: flex;
+      gap: 30px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+      position: relative;
+      z-index: 2;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 120px);
+      grid-template-rows: repeat(3, 120px);
+      gap: 10px;
+    }
+    .cell {
+      width: 120px;
+      height: 120px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 3em;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .cell:hover { background: rgba(255,255,255,0.2); }
+    .cell.win {
+      background: #00ffcc;
+      color: #111;
+      animation: glow 1s infinite alternate;
+      transform: scale(1.1);
+    }
+    @keyframes glow {
+      from { box-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
+      to { box-shadow: 0 0 20px #00ffcc, 0 0 40px #00ffcc; }
+    }
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 220px;
+    }
+    button, select {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.2);
+      color: #373333;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    button:hover, select:hover {
+      background: rgba(255,255,255,0.35);
+      transform: scale(1.05);
+    }
+    .status { font-weight: bold; font-size: 1.2em; }
+    .scoreboard { display: flex; justify-content: space-between; }
+    .score { text-align: center; }
+
+    /* Celebration Modal */
+    .modal {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%) scale(0.5);
+      background: rgba(168, 146, 146, 0.95);
+      color: #111;
+      padding: 30px 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      text-align: center;
+      font-size: 2em;
+      z-index: 5;
+      opacity: 0;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+    .modal.show {
+      opacity: 1;
+      transform: translate(-50%,-50%) scale(1);
+    }
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+
+  <header>
+    <h1>✨ Tic Tac Toe ✨</h1>
+  </header>
+
+  <div class="container">
+    <div class="board" id="board"></div>
+    <div class="sidebar">
+      <div>
+        <label>Mode:</label>
+        <select id="modeSel">
+          <option value="pvp">Player vs Player</option>
+          <option value="pve-easy">Player vs Computer — Easy</option>
+          <option value="pve-hard">Player vs Computer — Hard</option>
+        </select>
+      </div>
+      <div>
+        <label>Who starts:</label>
+        <select id="firstSel">
+          <option value="X">X</option>
+          <option value="O">O</option>
+        </select>
+      </div>
+      <button id="newGameBtn">New Game</button>
+      <button id="resetBtn">Reset Scores</button>
+      <div class="status" id="status">X's turn</div>
+      <div class="scoreboard">
+        <div class="score">X: <span id="scoreX">0</span></div>
+        <div class="score">Draw: <span id="scoreD">0</span></div>
+        <div class="score">O: <span id="scoreO">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Created by Vanshika Sardana ❤️
+  </footer>
+
+  <!-- Celebration Modal -->
+  <div id="modal" class="modal"></div>
+
+  <script>
+    const boardEl = document.getElementById("board");
+    const statusEl = document.getElementById("status");
+    const scoreXEl = document.getElementById("scoreX");
+    const scoreOEl = document.getElementById("scoreO");
+    const scoreDEl = document.getElementById("scoreD");
+    const modeSel = document.getElementById("modeSel");
+    const firstSel = document.getElementById("firstSel");
+    const modal = document.getElementById("modal");
+
+    let board = Array(9).fill("");
+    let current = "X";
+    let scores = { X:0, O:0, D:0 };
+    let locked = false;
+
+    function renderBoard(){
+      boardEl.innerHTML = "";
+      board.forEach((val,i)=>{
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.index = i;
+        cell.textContent = val;
+        cell.addEventListener("click", ()=>handleClick(i));
+        boardEl.appendChild(cell);
+      });
+    }
+
+    function handleClick(i){
+      if(locked || board[i] !== "" || checkWinner(board)) return;
+      board[i] = current;
+      current = current==="X"?"O":"X";
+      renderBoard();
+      updateStatus();
+      checkEnd();
+      maybeAITurn();
+    }
+
+    function updateStatus(){
+      if(checkWinner(board)){
+        statusEl.textContent = checkWinner(board)+" wins!";
+      } else if(board.every(c=>c!=="")){
+        statusEl.textContent = "It's a draw!";
+      } else {
+        statusEl.textContent = current+"'s turn";
+      }
+    }
+
+    function checkWinner(bd){
+      const wins = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+      for(let [a,b,c] of wins){
+        if(bd[a] && bd[a]===bd[b] && bd[a]===bd[c]) {
+          highlightCells([a,b,c]);
+          return bd[a];
+        }
+      }
+      return null;
+    }
+
+    function highlightCells(cells){
+      const cellEls = document.querySelectorAll(".cell");
+      cells.forEach(i => cellEls[i].classList.add("win"));
+    }
+
+    function checkEnd(){
+      const winner = checkWinner(board);
+      if(winner){
+        scores[winner]++;
+        updateScores();
+        locked = true;
+        showCelebration(`${winner} Wins! 🎉`);
+      } else if(board.every(c=>c!=="")){
+        scores.D++;
+        updateScores();
+        locked = true;
+        showCelebration("It's a Draw 🤝");
+      }
+    }
+
+    function updateScores(){
+      scoreXEl.textContent = scores.X;
+      scoreOEl.textContent = scores.O;
+      scoreDEl.textContent = scores.D;
+    }
+
+    function whoIsAI(){
+      if(!modeSel.value.startsWith("pve")) return null;
+      return firstSel.value === "X" ? "O" : "X";
+    }
+
+    function maybeAITurn(){
+      const ai = whoIsAI();
+      if(modeSel.value.startsWith("pve") && current===ai && !checkWinner(board)){
+        locked = true;
+        setTimeout(()=>{
+          let move;
+          if(modeSel.value==="pve-hard") move = bestMoveMinimax(board, ai).index;
+          else move = randomMove();
+          if(move!=null){
+            board[move] = ai;
+            current = current==="X"?"O":"X";
+            renderBoard();
+            updateStatus();
+            checkEnd();
+          }
+          locked = false;
+        }, 500);
+      }
+    }
+
+    function randomMove(){
+      const avail = board.map((v,i)=>v===""?i:null).filter(v=>v!=null);
+      if(avail.length===0) return null;
+      return avail[Math.floor(Math.random()*avail.length)];
+    }
+
+    function bestMoveMinimax(newBoard, player){
+      const availSpots = newBoard.map((v,i)=>v===""?i:null).filter(v=>v!=null);
+      const winner = checkWinner(newBoard);
+      if(winner==="X") return {score:-10};
+      else if(winner==="O") return {score:10};
+      else if(availSpots.length===0) return {score:0};
+
+      const moves = [];
+      for(let i of availSpots){
+        const move = {};
+        move.index = i;
+        newBoard[i] = player;
+        const result = bestMoveMinimax(newBoard, player==="O"?"X":"O");
+        move.score = result.score;
+        newBoard[i] = "";
+        moves.push(move);
+      }
+
+      let bestMove;
+      if(player==="O"){
+        let bestScore = -10000;
+        for(let i=0;i<moves.length;i++){
+          if(moves[i].score > bestScore){
+            bestScore = moves[i].score;
+            bestMove = i;
+          }
+        }
+      } else {
+        let bestScore = 10000;
+        for(let i=0;i<moves.length;i++){
+          if(moves[i].score < bestScore){
+            bestScore = moves[i].score;
+            bestMove = i;
+          }
+        }
+      }
+      return moves[bestMove];
+    }
+
+    function showCelebration(message){
+      modal.textContent = message;
+      modal.classList.add("show");
+
+      // Confetti effect
+      for(let i=0; i<50; i++){
+        const confetti = document.createElement("div");
+        confetti.style.position = "fixed";
+        confetti.style.top = "-10px";
+        confetti.style.left = Math.random()*100+"%";
+        confetti.style.width = "10px";
+        confetti.style.height = "10px";
+        confetti.style.background = `hsl(${Math.random()*360},100%,50%)`;
+        confetti.style.opacity = 0.8;
+        confetti.style.borderRadius = "50%";
+        confetti.style.transform = `rotate(${Math.random()*360}deg)`;
+        confetti.style.animation = `fall ${2+Math.random()*3}s linear forwards`;
+        document.body.appendChild(confetti);
+
+        setTimeout(()=>confetti.remove(), 5000);
+      }
+    }
+
+    document.getElementById("newGameBtn").addEventListener("click", ()=>{
+      board = Array(9).fill("");
+      current = firstSel.value;
+      locked = false;
+      modal.classList.remove("show");
+      renderBoard();
+      updateStatus();
+      if(modeSel.value.startsWith("pve") && current===whoIsAI()){
+        maybeAITurn();
+      }
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", ()=>{
+      scores = {X:0,O:0,D:0};
+      updateScores();
+    });
+
+    renderBoard();
+    updateStatus();
+
+    // Falling animation for confetti
+    const style = document.createElement("style");
+    style.innerHTML = `
+      @keyframes fall {
+        to {
+          transform: translateY(100vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Generate stars
+    const starsContainer = document.getElementById("stars");
+    for(let i=0; i<100; i++){
+      const star = document.createElement("div");
+      star.classList.add("star");
+      star.style.top = Math.random()*100+"%";
+      star.style.left = Math.random()*100+"%";
+      star.style.animationDuration = (1+Math.random()*2)+"s";
+      starsContainer.appendChild(star);
+    }
+  </script>
+</body>
+</html>
